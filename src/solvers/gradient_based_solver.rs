@@ -1,5 +1,4 @@
-use std::ops::DerefMut;
-use std::{cell::RefCell, error::Error, rc::Rc};
+use std::error::Error;
 
 use crate::sketch::Sketch;
 use crate::solvers::line_search::line_search_wolfe;
@@ -15,7 +14,7 @@ pub struct GradientBasedSolver {
 impl GradientBasedSolver {
     pub fn new() -> Self {
         Self {
-            max_iterations: 10000,
+            max_iterations: 200000,
             min_loss: 1e-14,
             min_grad: 1e-10,
         }
@@ -31,12 +30,20 @@ impl GradientBasedSolver {
 }
 
 impl Solver for GradientBasedSolver {
-    fn solve(&self, sketch: Rc<RefCell<Sketch>>) -> Result<(), Box<dyn Error>> {
+    fn new() -> Self
+    where
+        Self: Sized,
+    {
+        Self::new()
+    }
+    fn solve(&self, sketch: &mut Sketch) -> Result<(), Box<dyn Error>> {
         let mut iterations = 0;
 
-        let mut gradient = sketch.borrow_mut().get_gradient();
+        let mut gradient = sketch.get_gradient();
         let mut grad_norm = gradient.norm();
-        let mut loss = sketch.borrow_mut().get_loss();
+        let mut loss = sketch.get_loss();
+
+        let mut direction = gradient.clone();
         while iterations < self.max_iterations {
             if grad_norm < self.min_grad {
                 break;
@@ -44,17 +51,19 @@ impl Solver for GradientBasedSolver {
             if loss < self.min_loss {
                 break;
             }
-            let mut data = sketch.borrow_mut().get_data();
+            let mut data = sketch.get_data();
 
-            let direction = -&gradient;
-            let alpha = line_search_wolfe(sketch.borrow_mut().deref_mut(), &direction, &gradient)?;
+            // Direction = -gradient + 0.0 * direction
+            direction.axpy(-1.0, &gradient, 0.0);
+
+            let alpha = line_search_wolfe(sketch, &direction, &gradient)?;
             // data = data + alpha * direction
             data.axpy(alpha, &direction, 1.0);
-            sketch.borrow_mut().set_data(data);
+            sketch.set_data(data);
 
             // Update metrics
-            loss = sketch.borrow_mut().get_loss();
-            gradient = sketch.borrow_mut().get_gradient();
+            loss = sketch.get_loss();
+            gradient = sketch.get_gradient();
             grad_norm = gradient.norm();
 
             iterations += 1;

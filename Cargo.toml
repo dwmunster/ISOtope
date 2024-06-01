@@ -11,5 +11,12 @@ thiserror = "1.0.61"
 tsify = { version = "0.4.5", optional = true }
 wasm-bindgen = { version = "*", optional = true }
 
+[dev-dependencies]
+divan = "0.1.14"
+
+[[bench]]
+name = "solvers"
+harness = false
+
 [features]
 tsify = ["dep:tsify", "dep:wasm-bindgen"]

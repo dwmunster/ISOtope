@@ -37,6 +37,13 @@ impl Default for BFGSSolver {
 }
 
 impl Solver for BFGSSolver {
+    fn new() -> Self
+    where
+        Self: Sized,
+    {
+        Self::new()
+    }
+
     fn solve(&self, sketch: &mut Sketch) -> Result<(), Box<dyn Error>> {
         let mut iterations = 0;
         let mut data = sketch.get_data();
