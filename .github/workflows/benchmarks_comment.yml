@@ -60,7 +60,7 @@ jobs:
         with:
           issue-number: ${{ env.PR_NUMBER }}
           comment-author: 'github-actions[bot]'
-          body-includes: 'Benchmark Results - Solvers'
+          body-includes: 'Benchmark Results'
 
       - name: Create or update comment
         uses: actions/github-script@v7
