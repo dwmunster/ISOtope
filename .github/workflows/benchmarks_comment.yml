@@ -4,6 +4,9 @@ on:
     workflows: [ Run and Cache Benchmarks ]
     types: [ completed ]
 
+permissions:
+  pull-requests: write
+
 jobs:
   comment:
     if: github.event.workflow_run.conclusion == 'success'
@@ -13,7 +16,7 @@ jobs:
       PR_EVENT: event.json
     steps:
       - name: Download Benchmark Results
-        uses: actions/github-script@v6
+        uses: actions/github-script@v7
         with:
           script: |
             async function downloadArtifact(artifactName) {
