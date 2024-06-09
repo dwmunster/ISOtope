@@ -57,6 +57,7 @@ jobs:
 
       - name: Find Comment
         uses: peter-evans/find-comment@v3
+        id: fc
         with:
           issue-number: ${{ env.PR_NUMBER }}
           comment-author: 'github-actions[bot]'
